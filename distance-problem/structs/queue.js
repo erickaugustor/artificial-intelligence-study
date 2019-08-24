@@ -1,43 +1,43 @@
 class Queue {
   constructor() {
-    this.rotas = [];
-    this.distanciaTotal = [];
+    this.routes = [];
+    this.totalDistance = [];
   }
 
-  pushRotas(rota, distancia) {
-    this.rotas.push(rota);
+  pushRoute(route, distance) {
+    this.routes.push(route);
   }
 
-  pushDistania(distancia) {
-    this.distanciaTotal.push(distancia);   
+  pushDistance(distance) {
+    this.totalDistance.push(distance);   
   }
 
-  popRotas() {
-    return this.rotas.pop();
+  popRoute() {
+    return this.routes.pop();
   } 
  
-  popDistancia() {
-    return this.distanciaTotal.pop();
+  popDistance() {
+    return this.totalDistance.pop();
   } 
 
-  peekRota() {
-    return this.rotas[this.rotas.length - 1];
+  peekRoute() {
+    return this.routes[this.routes.length - 1];
   } 
 
-  peekDistancia() {
-    return this.distanciaTotal[this.distanciaTotal.length - 1];    
+  peekDistance() {
+    return this.totalDistance[this.totalDistance.length - 1];    
   }
 
   isEmpty() {
-    return this.rotas.length === 0 || this.rotas === undefined;
+    return this.routes.length === 0 || this.routes === undefined;
   } 
 
   size() {
-    return this.rotas.length;
+    return this.routes.length;
   } 
 
-  peekEverything() {
-    return this.rotas;
+  peekEveryRoutes() {
+    return this.routes;
   }
 }
 

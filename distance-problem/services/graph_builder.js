@@ -19,7 +19,7 @@ const transformStringInGraph = (text, graph) => {
     }
   });
 
-  console.log(graph)
+  return graph;
 }
 
 module.exports = {
