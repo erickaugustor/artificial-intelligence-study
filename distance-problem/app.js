@@ -9,7 +9,5 @@ const graph = new Graph();
 const inputCities = readTXTFile('file-01');
 
 const graphMapInfo = transformStringInGraph(inputCities, graph);
-calcByDepthSearch(graphMapInfo);
 
-
-console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', calcByDepthSearch(graphMapInfo));
+console.log('Result: ', calcByDepthSearch(graphMapInfo));
