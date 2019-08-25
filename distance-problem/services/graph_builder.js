@@ -15,7 +15,7 @@ const transformStringInGraph = (text, graph) => {
     }
 
     if (splitedRoute.length === 1 && splitedRoute[0] !== '') {
-      console.log(splitedRoute);
+      // console.log(splitedRoute);
     }
   });
 

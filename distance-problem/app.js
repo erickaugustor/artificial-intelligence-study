@@ -10,3 +10,6 @@ const inputCities = readTXTFile('file-01');
 
 const graphMapInfo = transformStringInGraph(inputCities, graph);
 calcByDepthSearch(graphMapInfo);
+
+
+console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', calcByDepthSearch(graphMapInfo));
