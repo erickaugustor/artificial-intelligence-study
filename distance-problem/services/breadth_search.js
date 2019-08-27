@@ -1,21 +1,21 @@
 const R = require('ramda');
-const Queue = require('../structs/queue');
+const Stack = require('../structs/stack');
 
-const queueRoutes = new Queue();
+const stackRoutes = new Stack();
 
-const calcByDepthSearch = (grapMapInfo) => {
+const calcByBreadthSearch = (grapMapInfo) => {
   const initialCity = grapMapInfo.getOrigin();
   const finalCity = grapMapInfo.getDestiny();
 
   const neighbourOfInitialCity = grapMapInfo.adjList.get(initialCity);
 
   let isRouteFounded = false;
-  
-  const pushNeighofFirstCity = route => queueRoutes.pushRoute({ route: [route], citiesInRoute: [initialCity, route.neighbour] });
+
+  const pushNeighofFirstCity = route => stackRoutes.pushRoute({ route: [route], citiesInRoute: [initialCity, route.neighbour] });
   R.forEach(pushNeighofFirstCity, neighbourOfInitialCity);
 
-  while(!isRouteFounded && !queueRoutes.isEmpty()) {
-    const routeBeingTested = queueRoutes.popRoute();
+  while(!isRouteFounded && !stackRoutes.isEmpty()) {
+    const routeBeingTested = stackRoutes.popRoute();
 
     const positionOfLastCityInRoute = routeBeingTested.route.length - 1;
 
@@ -40,7 +40,7 @@ const calcByDepthSearch = (grapMapInfo) => {
           newValidRoute.push(...routeBeingTested.route, route);
           newValidCitiesInRoute.push(...routeBeingTested.citiesInRoute, route.neighbour);
   
-          queueRoutes.pushRoute({ route: newValidRoute, citiesInRoute: newValidCitiesInRoute });
+          stackRoutes.pushRoute({ route: newValidRoute, citiesInRoute: newValidCitiesInRoute });
         }
       });
 
@@ -51,5 +51,5 @@ const calcByDepthSearch = (grapMapInfo) => {
 };
 
 module.exports = {
-  calcByDepthSearch,
+  calcByBreadthSearch,
 };

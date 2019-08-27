@@ -1,4 +1,6 @@
-class Queue {
+const R = require('ramda');
+
+class Stack {
   constructor() {
     this.routes = [];
     this.totalDistance = [];
@@ -13,19 +15,24 @@ class Queue {
   }
 
   popRoute() {
-    return this.routes.pop();
+    const firstRoute = this.routes[0];
+    this.routes = R.slice(1, this.routes.length, this.routes);
+
+    return firstRoute;
   } 
  
   popDistance() {
-    return this.totalDistance.pop();
+    const firstRoute = this.routes[1];
+    this.routes = R.slice(1, this.routes.length, this.routes);
+    return firstRoute;
   } 
 
   peekRoute() {
-    return this.routes[this.routes.length - 1];
+    return this.routes[1];
   } 
 
   peekDistance() {
-    return this.totalDistance[this.totalDistance.length - 1];    
+    return this.totalDistance[1];    
   }
 
   isEmpty() {
@@ -41,4 +48,4 @@ class Queue {
   }
 }
 
-module.exports = Queue;
+module.exports = Stack;
