@@ -1,5 +1,6 @@
-Cidade1, Cidade2;
-Cidade1, Cidade3;
-Cidade2, Cidade4;
+Cidade1, Cidade2, 10;
+Cidade1, Cidade3, 1;
+Cidade2, Cidade3, 5;
+Cidade2, Cidade4, 2;
 Cidade1;
 Cidade4;

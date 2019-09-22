@@ -10,9 +10,9 @@ const transformStringInGraph = (text, graph) => {
   arrayRoutes.forEach(route => {
     const splitedRoute = splitComma(route);
     
-    if (splitedRoute.length === 2) {
-      graph.addEdge(splitedRoute[0], splitedRoute[1], 0);
-      graph.addEdge(splitedRoute[1], splitedRoute[0], 0);
+    if (splitedRoute.length === 3) {
+      graph.addEdge(splitedRoute[0], splitedRoute[1], parseInt(splitedRoute[2]));
+      graph.addEdge(splitedRoute[1], splitedRoute[0], parseInt(splitedRoute[2]));
     }
 
     if (splitedRoute.length === 1 && splitedRoute[0] !== '') {
