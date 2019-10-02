@@ -12,7 +12,8 @@ const graph = new Graph();
 const inputCities = readTXTFile('file-01');
 
 const graphMapInfo = transformStringInGraph(inputCities, graph);
+console.log('Graph structure: ', graphMapInfo);
 
-// console.log('Result: ', calcByDepthSearch(graphMapInfo));
-// console.log('Result: ', calcByBreadthSearch(graphMapInfo));
+console.log('Result: ', calcByDepthSearch(graphMapInfo));
+console.log('Result: ', calcByBreadthSearch(graphMapInfo));
 console.log('Result: ', calcByHeuristicSearch(graphMapInfo));
