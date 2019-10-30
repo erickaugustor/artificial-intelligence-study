@@ -48,5 +48,7 @@ plot(train) + abline(lm)
 plot(test) + abline(lm)
 pred <- predict(lm, test)
 
+plot(pred)
+
 
 
