@@ -1,11 +1,30 @@
-location <- getwd()
-locationFiles <- paste0(getwd(), '/file-numbers')
+library(tidyverse)
 
+location <- getwd()
+# locationFiles <- paste0(getwd(), '/files-numbers')
 setwd(location)
 
+files <- list.files(path = location)
+
+newDataFrame <- data.frame()
 
 
-arquivos <- list.files(locationFiles, pattern = '/file-numbers/*BMP.inv.pgm')
+# Need tidyverse for the read_lines
+completeFile <- read_lines(files[1])
+completeFile <- completeFile[-(1:3)] # Remove the first three lines
+
+pieces <- unlist(strsplit(completeFile, " ")) # Beak into spaces
+pieces <- as.numeric(pieces) # transform to numbers
+
+length(pieces)
+
+newDataFrame <- matrix(unlist(pieces), nrow = nrow(newDataFrame) + 1, ncol = 4096)
+
+
+
+
+
+
 
 
 
