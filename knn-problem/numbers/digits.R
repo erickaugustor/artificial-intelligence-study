@@ -1,60 +1,134 @@
 library(tidyverse)
-
-location <- getwd()
-# locationFiles <- paste0(getwd(), '/files-numbers')
-setwd(location)
-
-files <- list.files(path = location)
-
-newDataFrame <- data.frame()
+library(ggplot2)
 
 
-# Need tidyverse for the read_lines
-completeFile <- read_lines(files[1])
-completeFile <- completeFile[-(1:3)] # Remove the first three lines
+locationFiles <- paste0(getwd(), '/files-numbers')
+setwd(locationFiles)
 
-pieces <- unlist(strsplit(completeFile, " ")) # Beak into spaces
-pieces <- as.numeric(pieces) # transform to numbers
+filesList <- list.files(path = locationFiles)
 
-length(pieces)
-
-newDataFrame <- matrix(unlist(pieces), nrow = nrow(newDataFrame) + 1, ncol = 4096)
+dataFrame <- data.frame()
+classe <- c()
 
 
+#############################################################################
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-df<- data.frame(matrix(nrow=0, ncol=4097, byrow=T))
-
-i <- 0
-for(arquivo in arquivos){
-  i <- i +1
-  print(paste('Processando arquivo ',i,' de ', length(arquivos)))
-  row <- nrow(df) + 1
-  tempCsv <- read.csv(paste(diretorio, arquivo, sep=''))
-  tipo <- unlist(strsplit(arquivo, '_'))[1]
-  tempCsv <- tempCsv[-1:-2,]
+for(file in filesList) {
+  classe <- c(classe, as.numeric(unlist(strsplit(file, "_"))[1]))
+  contentFile <- read_lines(file)
+  contentFile <- contentFile[-(1:3)] # Remove the first three lines
   
-  colunasString <- unlist(strsplit(as.character(tempCsv), " "))
-  colunasString <- c(colunasString, tipo)
-  
-  df<- matrix(unlist(colunasString), nrow = row, ncol = 4097)
+  contentFile <- unlist(strsplit(contentFile, " ")) # Break into spaces
+  contentFile <- as.numeric(contentFile) # Transform to numbers
+
+  dataFrame <- matrix(
+    unlist(contentFile),
+    nrow = nrow(dataFrame) + 1,
+    ncol = length(contentFile)
+  )
+  dataFrame <- as.data.frame(dataFrame)
+  dataFrame$classe <- classe
 }
 
-df <- as.data.frame(df)
+#############################################################################
 
-df
+# Separete dataframe in teste and train
+
+indexes <- sample(1:nrow(dataFrame), as.integer(0.8 * nrow(dataFrame)))
+
+train <- dataFrame[indexes, ]
+test <- dataFrame[-indexes, ]
+
+classesTrain <- train$classe
+classesTest <- factor(test$classe) 
+
+test$classe <- NULL
+
+
+#############################################################################
+
+# KNN
+
+install.packages("caret")
+
+library(lattice)
+library(caret)
+
+
+# Acuracia
+acuracia <- vector()
+
+# KNN implementations:
+K1 <- knn(train, test, classesTrain, 1)
+results <- as.data.frame(K1)
+confusionMatrix(K1, classesTest)
+
+K3 <- knn(train, test, classesTrain, 3)
+results[,2] <- as.data.frame(K3)
+confusionMatrix(K3, classesTest)
+
+K7 <- knn(train, test, classesTrain, 7)
+results[,3] <- as.data.frame(K7)
+confusionMatrix(K7, classesTest)
+
+K9 <- knn(train, test, classesTrain, 9)
+results[,4] <- as.data.frame(K9)
+confusionMatrix(K9, classesTest)
+
+correctResults <- as.vector(dataFrame[-indexes, ncol(dataFrame)])
+results[,5] <- as.data.frame(correctResults)
+
+
+# Calculando acuracia
+for (i in 1:ncol(results) - 1) {
+  tabela <- table(results[,i] == results[,5])
+  qtdTrue <- tab[names(tab) == TRUE]
+  
+  acuracia[i] <- qtdTrue/nrow(results)
+  
+  tabela <- NA
+  qtdTrue <- NA
+}
+
+
+#############################################################################
+
+# SVM
+
+install.packages("e1071")
+library(e1071)
+
+classificadorSVM = svm(
+                    formula = classe~ .,
+                    data = train,
+                    type = 'C-classification',
+                    kernel = 'linear')
+
+predictSVM = predict(classificadorSVM, newdata = test)
+
+confusionMatrix(predictSVM, classesTest)
+
+
+#############################################################################
+
+install.packages("rpart")
+install.packages("rpart.plot")
+
+library(rpart)
+library(rpart.plot)
+
+modeloTree <- rpart(
+                    formula = classe~.,
+                    data = train,
+                    method = "class",
+                    control = rpart.control(minsplit = 1))
+
+plot <- rpart.plot(modeloTree, type = 3)
+
+predictTree <- predict(modeloTree, test, type = "class")
+
+confusionMatrix(predictTree, classesTest)
+
+
+#############################################################################
+
