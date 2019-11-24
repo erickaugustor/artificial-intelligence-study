@@ -132,3 +132,14 @@ confusionMatrix(predictTree, classesTest)
 
 #############################################################################
 
+# Elbow
+
+wss <- (nrow(dataFrame) - 1) * sum(apply(dataFrame, 2, var))
+
+for (i in 2:20) {
+  wss[i] <- sum(kmeans(dataFrame, centers=i)$withinss)
+}
+
+plot(1:20, wss, type="b", xlab="Número de Clusters")
+
+#############################################################################
