@@ -1,7 +1,6 @@
 library(tidyverse)
 library(ggplot2)
 
-
 locationFiles <- paste0(getwd(), '/files-numbers')
 setwd(locationFiles)
 
@@ -9,7 +8,6 @@ filesList <- list.files(path = locationFiles)
 
 dataFrame <- data.frame()
 classe <- c()
-
 
 #############################################################################
 
@@ -37,13 +35,16 @@ for(file in filesList) {
 indexes <- sample(1:nrow(dataFrame), as.integer(0.8 * nrow(dataFrame)))
 
 train <- dataFrame[indexes, ]
+trainBackup <- train
+
+
 test <- dataFrame[-indexes, ]
 
 classesTrain <- train$classe
 classesTest <- factor(test$classe) 
 
 test$classe <- NULL
-
+train$classe <- NULL
 
 #############################################################################
 
@@ -53,42 +54,26 @@ install.packages("caret")
 
 library(lattice)
 library(caret)
-
+library(class)
 
 # Acuracia
 acuracia <- vector()
 
 # KNN implementations:
-K1 <- knn(train, test, classesTrain, 1)
-results <- as.data.frame(K1)
-confusionMatrix(K1, classesTest)
+k.optm = 1
 
-K3 <- knn(train, test, classesTrain, 3)
-results[,2] <- as.data.frame(K3)
-confusionMatrix(K3, classesTest)
+for (i in 1:15){
+  knn.mod <- knn(train = train, test=test, cl=classesTrain, k=i)
 
-K7 <- knn(train, test, classesTrain, 7)
-results[,3] <- as.data.frame(K7)
-confusionMatrix(K7, classesTest)
-
-K9 <- knn(train, test, classesTrain, 9)
-results[,4] <- as.data.frame(K9)
-confusionMatrix(K9, classesTest)
-
-correctResults <- as.vector(dataFrame[-indexes, ncol(dataFrame)])
-results[,5] <- as.data.frame(correctResults)
-
-
-# Calculando acuracia
-for (i in 1:ncol(results) - 1) {
-  tabela <- table(results[,i] == results[,5])
-  qtdTrue <- tab[names(tab) == TRUE]
+  print(confusionMatrix(knn.mod, classesTest))
   
-  acuracia[i] <- qtdTrue/nrow(results)
-  
-  tabela <- NA
-  qtdTrue <- NA
+  k.optm[i] <- 100 * sum(classesTest == knn.mod)/NROW(classesTest)
+  k=i
+  cat(k, '=', k.optm[i], '')
 }
+
+
+plot(k.optm, type="b", xlab="Valor de K", ylab="Nível de Acurácia")
 
 
 #############################################################################
@@ -98,9 +83,11 @@ for (i in 1:ncol(results) - 1) {
 install.packages("e1071")
 library(e1071)
 
+trainSVM <- trainBackup
+
 classificadorSVM = svm(
                     formula = classe~ .,
-                    data = train,
+                    data = trainSVM,
                     type = 'C-classification',
                     kernel = 'linear')
 
@@ -110,6 +97,8 @@ confusionMatrix(predictSVM, classesTest)
 
 
 #############################################################################
+
+# Tree
 
 install.packages("rpart")
 install.packages("rpart.plot")
@@ -143,3 +132,23 @@ for (i in 2:20) {
 plot(1:20, wss, type="b", xlab="Número de Clusters")
 
 #############################################################################
+
+# K-means
+install.packages("factoextra")
+
+library(cluster)
+library(factoextra)
+
+dataFrameCluster <- dataFrame[,-4097]
+resultKMeans <- kmeans(dataFrameCluster, 10)
+
+fviz_cluster(resultKMeans,
+             data = dataFrameCluster,
+             ggtheme = theme_minimal(),
+             main = "Partitioning Clustering Plot"
+            )
+
+
+#############################################################################
+
+
