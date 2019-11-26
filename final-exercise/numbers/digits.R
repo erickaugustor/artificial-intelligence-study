@@ -56,25 +56,29 @@ library(lattice)
 library(caret)
 library(class)
 
-# Acuracia
-acuracia <- vector()
-
-# KNN implementations:
-k.optm = 1
-
-for (i in 1:15){
-  knn.mod <- knn(train = train, test=test, cl=classesTrain, k=i)
-
-  print(confusionMatrix(knn.mod, classesTest))
+knnImplementation <- function(train, test, classesTrain) {
+  k.optm = 1
   
-  k.optm[i] <- 100 * sum(classesTest == knn.mod)/NROW(classesTest)
-  k=i
-  cat(k, '=', k.optm[i], '')
+  for (i in 1:15){
+    knn.mod <- knn(train = train, test=test, cl=classesTrain, k=i)
+    
+    print(confusionMatrix(knn.mod, classesTest))
+    
+    k.optm[i] <- 100 * sum(classesTest == knn.mod)/NROW(classesTest)
+    k=i
+    cat(k, '=', k.optm[i], '')
+  }
+  
+  
+  plot(k.optm, type="b", xlab="Valor de K", ylab="Nível de Acurácia")
+  
+  return(k.optm)
 }
 
+#############################################################################
 
-plot(k.optm, type="b", xlab="Valor de K", ylab="Nível de Acurácia")
-
+# Execute the function 
+knnImplementation(train, test, classesTrain)
 
 #############################################################################
 
@@ -83,18 +87,30 @@ plot(k.optm, type="b", xlab="Valor de K", ylab="Nível de Acurácia")
 install.packages("e1071")
 library(e1071)
 
+svmImplementation = function(train, test, classesTest) {
+  classificadorSVM = svm(
+    formula = classe~ .,
+    data = trainSVM,
+    type = 'C-classification',
+    kernel = 'linear')
+  
+  predictSVM = predict(classificadorSVM, newdata = test)
+  
+  confusionMatrix(predictSVM, classesTest)
+}
+
+#############################################################################
+
 trainSVM <- trainBackup
+testSVM <- test
+classesTestSVM <- classesTest
 
-classificadorSVM = svm(
-                    formula = classe~ .,
-                    data = trainSVM,
-                    type = 'C-classification',
-                    kernel = 'linear')
+# Execute the function 
+svmImplementation(trainSVM, testSVM, classesTestSVM)
 
-predictSVM = predict(classificadorSVM, newdata = test)
-
-confusionMatrix(predictSVM, classesTest)
-
+trainSVM <- NULL
+testSVM <- NULL
+classesTestSVM <- NULL
 
 #############################################################################
 
@@ -106,30 +122,50 @@ install.packages("rpart.plot")
 library(rpart)
 library(rpart.plot)
 
-modeloTree <- rpart(
-                    formula = classe~.,
-                    data = train,
-                    method = "class",
-                    control = rpart.control(minsplit = 1))
+treeImplementation <- function(train, test, classesTest) {
+  modeloTree <- rpart(
+    formula = classe~.,
+    data = train,
+    method = "class",
+    control = rpart.control(minsplit = 1))
+  
+  predictTree <- predict(modeloTree, test, type = "class")
+  
+  confusionMatrix(predictTree, classesTest) 
+}
 
-plot <- rpart.plot(modeloTree, type = 3)
+#############################################################################
 
-predictTree <- predict(modeloTree, test, type = "class")
+trainTREE <- trainBackup
+testTREE <- test
+classesTestTREE <- classesTest
 
-confusionMatrix(predictTree, classesTest)
+# Execute the function 
+treeImplementation(trainTREE, testTREE, classesTestTREE)
+
+trainTREE <- NULL
+testTREE <- NULL
+classesTestTREE <- NULL
 
 
 #############################################################################
 
 # Elbow
 
-wss <- (nrow(dataFrame) - 1) * sum(apply(dataFrame, 2, var))
-
-for (i in 2:20) {
-  wss[i] <- sum(kmeans(dataFrame, centers=i)$withinss)
+elbowImplementation <- function(dataFrame) {
+  wss <- (nrow(dataFrame) - 1) * sum(apply(dataFrame, 2, var))
+  
+  for (i in 2:20) {
+    wss[i] <- sum(kmeans(dataFrame, centers=i)$withinss)
+  }
+  
+  plot(1:20, wss, type="b", xlab="Número de Clusters")  
 }
 
-plot(1:20, wss, type="b", xlab="Número de Clusters")
+#############################################################################
+
+# Execute the function 
+elbowImplementation(dataFrame)
 
 #############################################################################
 
@@ -142,13 +178,40 @@ library(factoextra)
 dataFrameCluster <- dataFrame[,-4097]
 resultKMeans <- kmeans(dataFrameCluster, 10)
 
-fviz_cluster(resultKMeans,
-             data = dataFrameCluster,
-             ggtheme = theme_minimal(),
-             main = "Partitioning Clustering Plot"
-            )
+#############################################################################
+
+# PCA
+pcaTrain <- trainBackup[,1:4096]
+
+dataFramePCA <- prcomp(pcaTrain, center = TRUE, scale. = TRUE)
+pcaTrain <- NULL
+
+# Most important itens in the PCA
+summary(dataFramePCA)
+
+# Dimensons
+fviz_eig(dataFramePCA)
+
+# Dataset
+
+trainPCA <- prcomp(train, center = TRUE, scale. = TRUE)
+testPCA <- prcomp(test, center = TRUE, scale. = TRUE)
+classesTrainPCA <- prcomp(classesTrain, center = TRUE, scale. = TRUE)
+
+# Implementations with PCA:
+
+# KNN
+knnImplementation(train, test, classesTrain)
+
+# SVM
+svmImplementation(trainPCA, testPCA, classesTrainPCA)
+
+# TREE  
+treeImplementation(trainPCA, testPCA, classesTrainPCA)
+
+# Elbow
+elbowImplementation(dataFramePCA)
 
 
 #############################################################################
-
 
