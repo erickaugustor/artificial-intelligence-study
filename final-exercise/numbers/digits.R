@@ -90,7 +90,7 @@ library(e1071)
 svmImplementation = function(train, test, classesTest) {
   classificadorSVM = svm(
     formula = classe~ .,
-    data = trainSVM,
+    data = train,
     type = 'C-classification',
     kernel = 'linear')
   
@@ -175,43 +175,69 @@ install.packages("factoextra")
 library(cluster)
 library(factoextra)
 
+kmeansImplementation <- function(dataFrameCluster) {
+  resultKMeans <- kmeans(dataFrameCluster, 10)
+  
+  table(resultKMeans$cluster, dataFrame$classe)
+}
+
+#############################################################################
+
 dataFrameCluster <- dataFrame[,-4097]
-resultKMeans <- kmeans(dataFrameCluster, 10)
+
+# Execute the function
+kmeansImplementation(dataFrameCluster)
 
 #############################################################################
 
 # PCA
-pcaTrain <- trainBackup[,1:4096]
+dataframePCA <- dataFrame[,1:4096]
 
-dataFramePCA <- prcomp(pcaTrain, center = TRUE, scale. = TRUE)
-pcaTrain <- NULL
-
-# Most important itens in the PCA
-summary(dataFramePCA)
+dataframePCA <- prcomp(dataframePCA, center = TRUE, scale. = TRUE)
 
 # Dimensons
-fviz_eig(dataFramePCA)
+fviz_eig(dataframePCA)
 
 # Dataset
+newDataframePCA <- as.data.frame(predict(dataframePCA, dataFrame))
+newDataframePCA$classe <- dataFrame$classe # Add classes
 
-trainPCA <- prcomp(train, center = TRUE, scale. = TRUE)
-testPCA <- prcomp(test, center = TRUE, scale. = TRUE)
-classesTrainPCA <- prcomp(classesTrain, center = TRUE, scale. = TRUE)
+# Separete dataset 
+indexesPCA <- sample(1:nrow(newDataframePCA), as.integer(0.8 * nrow(newDataframePCA)))
+
+trainPCA <- newDataframePCA[indexesPCA, ]
+trainPCABackup <- trainPCA
+trainPCAClasses <- trainPCA$classe
+
+testPCA <- newDataframePCA[-indexesPCA, ]
+testPCAClasses <- factor(testPCA$classe)
+
+testPCA$classe <- NULL
+trainPCA$classe <- NULL
+
 
 # Implementations with PCA:
 
 # KNN
-knnImplementation(train, test, classesTrain)
+knnImplementation(trainPCA, testPCA, trainPCAClasses)
 
 # SVM
-svmImplementation(trainPCA, testPCA, classesTrainPCA)
+trainTREESVM <- trainPCABackup
+svmImplementation(trainTREESVM, testPCA, testPCAClasses)
 
-# TREE  
-treeImplementation(trainPCA, testPCA, classesTrainPCA)
+trainTREESVM <- NULL
+
+# TREE 
+trainTREEPCA <- trainPCABackup
+treeImplementation(trainTREEPCA, testPCA, testPCAClasses)
+
+trainTREEPCA <- NULL
 
 # Elbow
-elbowImplementation(dataFramePCA)
+elbowImplementation(newDataframePCA)
 
+# K-Means
+kmeansImplementation(newDataframePCA)
 
 #############################################################################
 
